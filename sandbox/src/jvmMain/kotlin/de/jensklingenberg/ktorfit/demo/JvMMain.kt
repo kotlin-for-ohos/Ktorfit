@@ -11,6 +11,7 @@ import de.jensklingenberg.ktorfit.ktorfit
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -26,7 +27,7 @@ val jvmClient = HttpClient {
     install(ContentNegotiation) {
         json(Json { isLenient = true; ignoreUnknownKeys = true })
     }
-
+    install(WebSockets)
     this.developmentMode = true
     expectSuccess = false
 
@@ -53,8 +54,9 @@ fun main() {
 
 
     runBlocking {
+       KtorfitClient(jvmKtorfit).socket()
 
-        val api = jvmKtorfit.create<JsonPlaceHolderApi>()
+        val response = exampleApi.getPersonById2(2)
 
         val test = api.getCommentsByPostIdResponse("3")
 

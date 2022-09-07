@@ -3,11 +3,16 @@ package de.jensklingenberg.ktorfit.internal
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.util.*
+import io.ktor.util.reflect.*
+import io.ktor.websocket.*
+
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -116,6 +121,18 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
         return requestType.cast(requestConverter.convert(data))
     }
 
+    suspend fun socket(){
+        httpClient.webSocket(method = HttpMethod.Get, host = "127.0.0.1", port = 8080, path = "/echo") {
+            while(true) {
+                val othersMessage = incoming.receive() as? Frame.Text
+                println(othersMessage?.readText())
+                val myMessage = "Hello World"
+                if(myMessage != null) {
+                    send(myMessage)
+                }
+            }
+        }
+    }
 
     private fun HttpRequestBuilder.requestBuilder(
         requestData: RequestData

@@ -5,8 +5,10 @@ import com.example.api.JsonPlaceHolderApi
 import com.example.model.MyOwnResponse
 import com.example.model.MyOwnResponseConverter
 import com.example.model.StringToIntRequestConverter
+import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.builtin.CallResponseConverter
 import de.jensklingenberg.ktorfit.converter.builtin.FlowResponseConverter
+import de.jensklingenberg.ktorfit.internal.KtorfitClient
 import de.jensklingenberg.ktorfit.ktorfit
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -54,21 +56,9 @@ fun main() {
 
 
     runBlocking {
-       KtorfitClient(jvmKtorfit).socket()
+        KtorfitClient(jvmKtorfit).socket()
 
-        val response = exampleApi.getPersonById2(2)
 
-        val test = api.getCommentsByPostIdResponse("3")
-
-        when (test) {
-            is MyOwnResponse.Success -> {
-                test
-            }
-
-            else -> {
-                test
-            }
-        }
 
 
         delay(3000)

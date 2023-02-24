@@ -21,7 +21,7 @@ import kotlin.reflect.cast
  * Please don't use the class directly
  */
 @InternalKtorfitApi
-internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
+public class KtorfitClient(private val ktorfit: Ktorfit) : Client {
 
     private val httpClient: HttpClient = ktorfit.httpClient
 
@@ -75,6 +75,18 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
         requestData: RequestData
     ): ReturnType? {
         try {
+            if(true){
+                httpClient.webSocket(method = HttpMethod.Get, host = "127.0.0.1", port = 8080, path = "/echo") {
+                    while(true) {
+                        val othersMessage = incoming.receive() as? Frame.Text
+                        println(othersMessage?.readText())
+                        val myMessage = "Hello World"
+                        if(myMessage != null) {
+                            send(myMessage)
+                        }
+                    }
+                }
+            }
 
             if (requestData.returnTypeInfo.type == (HttpStatement::class)) {
                 return httpClient.prepareRequest {
@@ -121,7 +133,7 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
         return requestType.cast(requestConverter.convert(data))
     }
 
-    suspend fun socket(){
+    public suspend fun socket(){
         httpClient.webSocket(method = HttpMethod.Get, host = "127.0.0.1", port = 8080, path = "/echo") {
             while(true) {
                 val othersMessage = incoming.receive() as? Frame.Text

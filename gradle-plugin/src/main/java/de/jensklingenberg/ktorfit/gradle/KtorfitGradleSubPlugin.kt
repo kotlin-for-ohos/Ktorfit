@@ -1,7 +1,10 @@
 package de.jensklingenberg.ktorfit.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import org.gradle.kotlin.dsl.findByType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
@@ -52,11 +55,34 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
     private fun Project.getKtorfitConfig() =
         this.extensions.findByType(KtorfitGradleConfiguration::class.java) ?: KtorfitGradleConfiguration()
 
+    private val Project.kotlinExtension
+        get() = project.extensions.findByType<KotlinMultiplatformExtension>()
+            ?: throw GradleException("Could not find Kotlin/Multiplatform plugin")
+
+
     override fun apply(target: Project) {
         target.extensions.create(GRADLE_TASKNAME, KtorfitGradleConfiguration::class.java)
         myproject = target
+        val ksp = target.extensions.findByName("ksp") != null
+
+        if (ksp) {
+            target.afterEvaluate {
+                kotlinExtension.targets.forEach {
+                    if (it.name == "metadata") return@forEach
+                    val name = if (it.name == "commonMain") {
+                        "ksp" + (it.name.capitalize()) + "MetaData"
+                    } else {
+                        "ksp" + (it.name.capitalize())
+                    }
+                    this.dependencies.add(name, "de.jensklingenberg.ktorfit:ktorfit-ksp:1.7.0")
+                    this.dependencies.add(name + "Test", "de.jensklingenberg.ktorfit:ktorfit-ksp:1.7.0")
+
+                }
+            }
+        }
         super.apply(target)
     }
+
 
     override fun getCompilerPluginId(): String = COMPILER_PLUGIN_ID
 
@@ -72,3 +98,5 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         )
     }
 }
+
+

@@ -3,6 +3,7 @@ plugins {
     kotlin("kapt") version("1.9.10")
     id("java-gradle-plugin")
     `maven-publish`
+    `kotlin-dsl`
     id("com.gradle.plugin-publish") version "1.2.1"
 }
 
@@ -26,12 +27,17 @@ java {
     }
 }
 
+dependencies {
+    add("compileOnly", kotlin("gradle-plugin"))
+    add("compileOnly", kotlin("gradle-plugin-api"))
+}
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.9.10")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.9.10")
 }
 
 gradlePlugin {

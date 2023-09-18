@@ -55,7 +55,6 @@ val ktorfit = "1.7.0"
 val ktor = "2.3.4"
 val compose_ui_version = "1.5.1"
 dependencies {
-    ksp("de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfit")
     implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfit")
     implementation("io.ktor:ktor-client-serialization:$ktor")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor")
@@ -74,4 +73,3 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_ui_version")
 }
-

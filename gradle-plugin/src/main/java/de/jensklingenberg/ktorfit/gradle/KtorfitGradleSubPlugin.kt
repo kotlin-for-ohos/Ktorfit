@@ -1,10 +1,11 @@
 package de.jensklingenberg.ktorfit.gradle
 
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.findByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
@@ -55,30 +56,42 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
     private fun Project.getKtorfitConfig() =
         this.extensions.findByType(KtorfitGradleConfiguration::class.java) ?: KtorfitGradleConfiguration()
 
-    private val Project.kotlinExtension
-        get() = project.extensions.findByType<KotlinMultiplatformExtension>()
-            ?: throw GradleException("Could not find Kotlin/Multiplatform plugin")
+    private val Project.kotlinExtension: KotlinProjectExtension?
+        get() = project.extensions.findByType<KotlinProjectExtension>()
 
 
     override fun apply(target: Project) {
         target.extensions.create(GRADLE_TASKNAME, KtorfitGradleConfiguration::class.java)
         myproject = target
         val ksp = target.extensions.findByName("ksp") != null
+        val version = myproject.version
 
         if (ksp) {
-            target.afterEvaluate {
-                kotlinExtension.targets.forEach {
-                    if (it.name == "metadata") return@forEach
-                    val name = if (it.name == "commonMain") {
-                        "ksp" + (it.name.capitalize()) + "MetaData"
-                    } else {
-                        "ksp" + (it.name.capitalize())
-                    }
-                    this.dependencies.add(name, "de.jensklingenberg.ktorfit:ktorfit-ksp:1.7.0")
-                    this.dependencies.add(name + "Test", "de.jensklingenberg.ktorfit:ktorfit-ksp:1.7.0")
-
+            when (val kotlinExtension = target.kotlinExtension) {
+                is KotlinSingleTargetExtension<*> -> {
+                    target.dependencies.add("ksp", "de.jensklingenberg.ktorfit:ktorfit-ksp:$version")
                 }
+
+                is KotlinMultiplatformExtension -> {
+                    target.afterEvaluate {
+                        kotlinExtension.targets.forEach {
+
+                            if (it.name == "metadata") return@forEach
+                            val name = if (it.name == "commonMain") {
+                                "ksp" + (it.name.capitalize()) + "MetaData"
+                            } else {
+                                "ksp" + (it.name.capitalize())
+                            }
+                            this.dependencies.add(name, "de.jensklingenberg.ktorfit:ktorfit-ksp:$version")
+                            this.dependencies.add(name + "Test", "de.jensklingenberg.ktorfit:ktorfit-ksp:$version")
+                        }
+                    }
+                }
+
+                else -> {}
             }
+
+
         }
         super.apply(target)
     }

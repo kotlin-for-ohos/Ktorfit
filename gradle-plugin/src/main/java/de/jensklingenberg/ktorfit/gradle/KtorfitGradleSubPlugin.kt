@@ -38,7 +38,7 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         const val GRADLE_TASKNAME = "ktorfit"
     }
 
-    private lateinit var myproject: Project
+    private lateinit var ktorfitGradleConfiguration: KtorfitGradleConfiguration
 
     override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> {
         val gradleExtension = kotlinCompilation.target.project.getKtorfitConfig()
@@ -59,9 +59,9 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
 
     override fun apply(target: Project) {
         target.extensions.create(GRADLE_TASKNAME, KtorfitGradleConfiguration::class.java)
-        myproject = target
+        ktorfitGradleConfiguration = target.getKtorfitConfig()
         val hasKspApplied = target.extensions.findByName("ksp") != null
-        val version = myproject.getKtorfitConfig().version
+        val version = ktorfitGradleConfiguration.version
 
         if (hasKspApplied) {
             val ktorfitKsp = "$GROUP_NAME:ktorfit-ksp:$version"
@@ -102,7 +102,7 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         return SubpluginArtifact(
             groupId = GROUP_NAME,
             artifactId = ARTIFACT_NAME,
-            version = myproject.getKtorfitConfig().version
+            version = ktorfitGradleConfiguration.version
         )
     }
 }

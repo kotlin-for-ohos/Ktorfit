@@ -18,7 +18,7 @@ open class KtorfitGradleConfiguration {
     var enabled: Boolean = true
 
     /**
-     * version number of the compiler plugin
+     * version number of Ktorfit
      */
     var version: String = "1.7.0" // remember to bump this version before any release!
 
@@ -32,24 +32,22 @@ open class KtorfitGradleConfiguration {
 class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
 
     companion object {
-        const val SERIALIZATION_GROUP_NAME = "de.jensklingenberg.ktorfit"
+        const val GROUP_NAME = "de.jensklingenberg.ktorfit"
         const val ARTIFACT_NAME = "compiler-plugin"
         const val COMPILER_PLUGIN_ID = "ktorfitPlugin"
         const val GRADLE_TASKNAME = "ktorfit"
     }
 
     private lateinit var myproject: Project
-    private var gradleExtension: KtorfitGradleConfiguration = KtorfitGradleConfiguration()
+
     override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> {
-        gradleExtension = kotlinCompilation.target.project.extensions.findByType(KtorfitGradleConfiguration::class.java)
-            ?: KtorfitGradleConfiguration()
+        val gradleExtension = kotlinCompilation.target.project.getKtorfitConfig()
 
         return kotlinCompilation.target.project.provider {
-            val options = mutableListOf(
+            mutableListOf(
                 SubpluginOption("enabled", gradleExtension.enabled.toString()),
                 SubpluginOption("logging", gradleExtension.logging.toString())
             )
-            options
         }
     }
 
@@ -57,19 +55,20 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         this.extensions.findByType(KtorfitGradleConfiguration::class.java) ?: KtorfitGradleConfiguration()
 
     private val Project.kotlinExtension: KotlinProjectExtension?
-        get() = project.extensions.findByType<KotlinProjectExtension>()
-
+        get() = this.extensions.findByType<KotlinProjectExtension>()
 
     override fun apply(target: Project) {
         target.extensions.create(GRADLE_TASKNAME, KtorfitGradleConfiguration::class.java)
         myproject = target
-        val ksp = target.extensions.findByName("ksp") != null
-        val version = myproject.version
+        val hasKspApplied = target.extensions.findByName("ksp") != null
+        val version = myproject.getKtorfitConfig().version
 
-        if (ksp) {
+        if (hasKspApplied) {
+            val ktorfitKsp = "$GROUP_NAME:ktorfit-ksp:$version"
+
             when (val kotlinExtension = target.kotlinExtension) {
                 is KotlinSingleTargetExtension<*> -> {
-                    target.dependencies.add("ksp", "de.jensklingenberg.ktorfit:ktorfit-ksp:$version")
+                    target.dependencies.add("ksp", ktorfitKsp)
                 }
 
                 is KotlinMultiplatformExtension -> {
@@ -82,30 +81,26 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
                             } else {
                                 "ksp" + (it.name.capitalize())
                             }
-                            this.dependencies.add(name, "de.jensklingenberg.ktorfit:ktorfit-ksp:$version")
-                            this.dependencies.add(name + "Test", "de.jensklingenberg.ktorfit:ktorfit-ksp:$version")
+                            this.dependencies.add(name, ktorfitKsp)
+                            this.dependencies.add(name + "Test", ktorfitKsp)
                         }
                     }
                 }
 
-                else -> {}
+                else -> { /* Do nothing */
+                }
             }
-
-
         }
         super.apply(target)
     }
 
-
     override fun getCompilerPluginId(): String = COMPILER_PLUGIN_ID
 
-    override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
-        return true
-    }
+    override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
     override fun getPluginArtifact(): SubpluginArtifact {
         return SubpluginArtifact(
-            groupId = SERIALIZATION_GROUP_NAME,
+            groupId = GROUP_NAME,
             artifactId = ARTIFACT_NAME,
             version = myproject.getKtorfitConfig().version
         )

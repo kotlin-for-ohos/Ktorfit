@@ -26,6 +26,8 @@ open class KtorfitGradleConfiguration {
      * used to get debug information from the compiler plugin
      */
     var logging: Boolean = false
+
+    var addKspDependencies : Boolean = true
 }
 
 
@@ -44,7 +46,7 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         val gradleExtension = kotlinCompilation.target.project.getKtorfitConfig()
 
         return kotlinCompilation.target.project.provider {
-            mutableListOf(
+            listOf(
                 SubpluginOption("enabled", gradleExtension.enabled.toString()),
                 SubpluginOption("logging", gradleExtension.logging.toString())
             )
@@ -63,7 +65,7 @@ class KtorfitGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         val hasKspApplied = target.extensions.findByName("ksp") != null
         val version = ktorfitGradleConfiguration.version
 
-        if (hasKspApplied) {
+        if (hasKspApplied && ktorfitGradleConfiguration.addKspDependencies) {
             val ktorfitKsp = "$GROUP_NAME:ktorfit-ksp:$version"
 
             when (val kotlinExtension = target.kotlinExtension) {

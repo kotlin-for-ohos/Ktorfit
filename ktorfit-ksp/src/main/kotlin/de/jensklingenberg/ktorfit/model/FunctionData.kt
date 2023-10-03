@@ -26,7 +26,6 @@ data class FunctionData(
 
     fun toFunSpec(resolver: Resolver): FunSpec {
         val returnTypeName = this.returnType.name
-        val innerReturnType = this.returnType.innerTypeName
         val nullableText = if (this.returnType.isNullable) {
             ""
         } else {
@@ -55,7 +54,7 @@ data class FunctionData(
                 )
             )
             .addStatement(
-                "return %L.%L<${returnTypeName}, ${innerReturnType}>(${requestDataClass.objectName})$nullableText",
+                "return %L.%L(${requestDataClass.objectName})$nullableText",
                 ktorfitClientClass.objectName,
                 if (this.isSuspend) {
                     "suspendRequest"

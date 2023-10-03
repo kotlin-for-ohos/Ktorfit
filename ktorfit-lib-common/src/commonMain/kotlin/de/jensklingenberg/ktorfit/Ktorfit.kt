@@ -5,12 +5,7 @@ import de.jensklingenberg.ktorfit.Strings.Companion.BASE_URL_REQUIRED
 import de.jensklingenberg.ktorfit.Strings.Companion.ENABLE_GRADLE_PLUGIN
 import de.jensklingenberg.ktorfit.Strings.Companion.EXPECTED_URL_SCHEME
 import de.jensklingenberg.ktorfit.converter.Converter
-import de.jensklingenberg.ktorfit.converter.SuspendResponseConverter
 import de.jensklingenberg.ktorfit.converter.builtin.KtorfitDefaultConverterFactory
-import de.jensklingenberg.ktorfit.converter.builtin.DefaultSuspendResponseConverterFactory
-import de.jensklingenberg.ktorfit.converter.request.CoreResponseConverter
-import de.jensklingenberg.ktorfit.converter.request.RequestConverter
-import de.jensklingenberg.ktorfit.converter.request.ResponseConverter
 import de.jensklingenberg.ktorfit.internal.*
 import de.jensklingenberg.ktorfit.internal.DefaultKtorfitService
 import de.jensklingenberg.ktorfit.internal.KtorfitClient
@@ -26,9 +21,6 @@ import kotlin.reflect.KClass
 public class Ktorfit private constructor(
     public val baseUrl: String,
     public val httpClient: HttpClient = HttpClient(),
-    public val responseConverters: Set<ResponseConverter>,
-    public val suspendResponseConverters: Set<SuspendResponseConverter>,
-    internal val requestConverters: Set<RequestConverter>,
     private val converterFactories: List<Converter.Factory>
 ) {
 
@@ -111,9 +103,6 @@ public class Ktorfit private constructor(
     public class Builder {
         private var _baseUrl: String = ""
         private var _httpClient: HttpClient? = null
-        private var _responseConverter: MutableSet<ResponseConverter> = mutableSetOf()
-        private var _suspendResponseConverter: MutableSet<SuspendResponseConverter> = mutableSetOf()
-        private var _requestConverter: MutableSet<RequestConverter> = mutableSetOf()
         private var _factories: MutableSet<Converter.Factory> = mutableSetOf()
 
         /**
@@ -181,31 +170,11 @@ public class Ktorfit private constructor(
         }
 
         /**
-         * Use this to add [ResponseConverter] or [SuspendResponseConverter] for unsupported return types of requests.
-         */
-        @Deprecated("Use converterFactories() instead")
-        public fun responseConverter(vararg converters: CoreResponseConverter): Builder = apply {
-            converters.forEach { converter ->
-                if (converter is ResponseConverter) {
-                    this._responseConverter.add(converter)
-                }
-                if (converter is SuspendResponseConverter) {
-                    this._suspendResponseConverter.add(converter)
-                }
-            }
-        }
-
-        /**
          * Add [Converter.Factory] with converters for unsupported return types of requests.
          * The converters coming from the factories will be used before the added [CoreResponseConverter]s
          */
         public fun converterFactories(vararg converters: Converter.Factory): Builder = apply {
             this._factories.addAll(converters)
-        }
-
-        @Deprecated("Use converterFactories() instead")
-        public fun requestConverter(vararg converters: RequestConverter): Builder = apply {
-            this._requestConverter.addAll(converters)
         }
 
         /**
@@ -220,9 +189,6 @@ public class Ktorfit private constructor(
             return Ktorfit(
                 baseUrl = _baseUrl,
                 httpClient = _httpClient ?: HttpClient(),
-                responseConverters = _responseConverter,
-                suspendResponseConverters = _suspendResponseConverter,
-                requestConverters = _requestConverter,
                 converterFactories = listOf(KtorfitDefaultConverterFactory()) + _factories.toList()
             )
         }

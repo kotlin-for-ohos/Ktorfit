@@ -1,4 +1,4 @@
-package de.jensklingenberg.ktorfit.converter.builtin
+package de.jensklingenberg.ktorfit.response
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.Response
@@ -9,14 +9,14 @@ import io.ktor.client.statement.*
 /**
  * Converter for [Response]
  */
-internal class KtorfitDefaultConverterFactory : Converter.Factory {
+internal class ResponseClassConverterFactory : Converter.Factory {
 
     override fun suspendResponseConverter(
         typeData: TypeData,
         ktorfit: Ktorfit
     ): Converter.SuspendResponseConverter<HttpResponse, *>? {
         if (typeData.typeInfo.type == Response::class) {
-            return DefaultResponseClassSuspendConverter(typeData, ktorfit)
+            return ResponseClassSuspendConverter(typeData, ktorfit)
         }
         return null
     }

@@ -8,13 +8,13 @@ public interface Client {
     /**
      * This will handle all requests for functions without suspend modifier
      */
-    public fun <ReturnType, RequestType> request(requestData: RequestData): ReturnType?
+    public fun <ReturnType> request(requestData: RequestData): ReturnType?
 
     /**
      * This will handle all requests for functions with suspend modifier
      * Used by generated Code
      */
-    public suspend fun <ReturnType, RequestType> suspendRequest(requestData: RequestData): ReturnType?
+    public suspend fun <ReturnType> suspendRequest(requestData: RequestData): ReturnType?
 
     /**
      * Convert [data] of type [parameterType] to [requestType]

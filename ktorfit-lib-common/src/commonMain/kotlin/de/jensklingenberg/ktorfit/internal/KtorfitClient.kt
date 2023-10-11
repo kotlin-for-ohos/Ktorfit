@@ -2,7 +2,6 @@ package de.jensklingenberg.ktorfit.internal
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.KtorfitResult
-import de.jensklingenberg.ktorfit.converter.builtin.DefaultSuspendResponseConverterFactory
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -19,36 +18,26 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
     /**
      * This will handle all requests for functions without suspend modifier
      */
-    override fun <ReturnType, RequestType : Any?> request(
+    override fun <ReturnType> request(
         requestData: RequestData
     ): ReturnType? {
         val returnTypeData = requestData.getTypeData()
 
-        ktorfit.nextResponseConverter(null, returnTypeData)?.let { responseConverter ->
-
-            return responseConverter.convert {
-                suspendRequest<HttpResponse, HttpResponse>(
-                    RequestData(
-                        ktorfitRequestBuilder = requestData.ktorfitRequestBuilder,
-                        returnTypeName = "io.ktor.client.statement.HttpResponse",
-                        returnTypeInfo = typeInfo<HttpResponse>()
-                    )
-                )!!
-            } as ReturnType?
-        }
-
-        /**
-         * Keeping this for compatibility
-         */
-        handleDeprecatedResponseConverters<ReturnType, RequestType>(requestData, ktorfit)?.let {
-            return it
-        }
+        ktorfit.nextResponseConverter(null, returnTypeData)?.convert {
+            suspendRequest<HttpResponse>(
+                RequestData(
+                    ktorfitRequestBuilder = requestData.ktorfitRequestBuilder,
+                    returnTypeName = "io.ktor.client.statement.HttpResponse",
+                    returnTypeInfo = typeInfo<HttpResponse>()
+                )
+            )!!
+        } as ReturnType?
 
         val typeIsNullable = returnTypeData.typeInfo.kotlinType?.isMarkedNullable ?: false
         return if (typeIsNullable) {
             null
         } else {
-            throw IllegalArgumentException("Add a ResponseConverter for " + returnTypeData.qualifiedName + " or make function suspend")
+            throw IllegalStateException("Add a ResponseConverter for " + returnTypeData.qualifiedName + " or make function suspend")
         }
 
     }
@@ -57,7 +46,7 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
      * This will handle all requests for functions with suspend modifier
      * Used by generated Code
      */
-    override suspend fun <ReturnType, RequestType : Any?> suspendRequest(
+    override suspend fun <ReturnType : Any?> suspendRequest(
         requestData: RequestData
     ): ReturnType? {
         val returnTypeData = requestData.getTypeData()
@@ -70,7 +59,6 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
             }
 
             ktorfit.nextSuspendResponseConverter(null, returnTypeData)?.let {
-
                 val result: KtorfitResult = try {
                     KtorfitResult.Success(httpClient.request {
                         requestBuilder(requestData)
@@ -80,19 +68,7 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
                 }
                 return it.convert(result) as ReturnType?
             }
-
-            /**
-             * Keeping this for compatibility
-             */
-            handleDeprecatedSuspendResponseConverters<ReturnType, RequestType>(requestData, httpClient, ktorfit)?.let {
-                return it
-            } ?: DefaultSuspendResponseConverterFactory().suspendResponseConverter(returnTypeData, ktorfit).let {
-                val response = httpClient.request {
-                    requestBuilder(requestData)
-                }
-                return it.convert(response) as ReturnType?
-            }
-
+            throw IllegalStateException("No suspend converter found")
         } catch (exception: Exception) {
             val typeIsNullable = returnTypeData.typeInfo.kotlinType?.isMarkedNullable ?: false
             return if (typeIsNullable) {
@@ -107,12 +83,8 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
         ktorfit.nextRequestParameterConverter(null, parameterType, requestType)?.let {
             return requestType.cast(it.convert(data))
         }
+            ?: throw IllegalStateException("No RequestConverter found to convert ${parameterType.simpleName} to ${requestType.simpleName}")
 
-        val requestConverter = ktorfit.requestConverters.firstOrNull {
-            it.supportedType(parameterType, requestType)
-        }
-            ?: throw IllegalArgumentException("No RequestConverter found to convert ${parameterType.simpleName} to ${requestType.simpleName}")
-        return requestType.cast(requestConverter.convert(data))
     }
 
     private fun HttpRequestBuilder.requestBuilder(

@@ -35,7 +35,10 @@ public interface Converter<F, T> {
          */
         @Deprecated("Use convert(result: KtorfitResult)")
         public suspend fun convert(response: HttpResponse): T
-
+        /**
+         *
+         * @return the converted [HttpResponse]
+         */
         public suspend fun convert(result: KtorfitResult): T {
             return when (result) {
                 is KtorfitResult.Failure -> {

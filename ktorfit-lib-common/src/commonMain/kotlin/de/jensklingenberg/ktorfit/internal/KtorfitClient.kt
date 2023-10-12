@@ -19,7 +19,8 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
      * This will handle all requests for functions without suspend modifier
      */
     override fun <ReturnType> request(
-        requestData: RequestData
+        requestData: RequestData,
+        ktorfitRequestBuilder: HttpRequestBuilder.() -> Unit
     ): ReturnType? {
         val returnTypeData = requestData.getTypeData()
 
@@ -29,7 +30,7 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
                     ktorfitRequestBuilder = requestData.ktorfitRequestBuilder,
                     returnTypeName = "io.ktor.client.statement.HttpResponse",
                     returnTypeInfo = typeInfo<HttpResponse>()
-                )
+                ), ktorfitRequestBuilder
             )!!
         } as ReturnType?
 
@@ -46,8 +47,9 @@ internal class KtorfitClient(private val ktorfit: Ktorfit) : Client {
      * This will handle all requests for functions with suspend modifier
      * Used by generated Code
      */
-    override suspend fun <ReturnType : Any?> suspendRequest(
-        requestData: RequestData
+    override suspend fun <ReturnType> suspendRequest(
+        requestData: RequestData,
+        ktorfitRequestBuilder: HttpRequestBuilder.() -> Unit
     ): ReturnType? {
         val returnTypeData = requestData.getTypeData()
 

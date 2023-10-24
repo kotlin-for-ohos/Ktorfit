@@ -82,7 +82,7 @@ class ClientTest {
 
             val ktorfit = Ktorfit.Builder().baseUrl("http://www.test.de/").build()
 
-            val converted = (KtorfitConverter(ktorfit) as Client).convertParameterType("4", String::class, Int::class)
+            val converted = (KtorfitConverter(ktorfit) ).convertParameterType("4", String::class, Int::class)
             assertEquals(4, converted)
 
         } catch (ex: Exception) {

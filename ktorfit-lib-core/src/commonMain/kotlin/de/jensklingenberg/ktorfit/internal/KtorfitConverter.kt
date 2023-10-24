@@ -9,13 +9,13 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
 @InternalKtorfitApi
-internal class KtorfitConverter(private val ktorfit: Ktorfit) : Client {
+public class KtorfitConverter(private val ktorfit: Ktorfit)  {
 
 
     /**
      * This will handle all requests for functions without suspend modifier
      */
-    override fun <ReturnType> request(
+    public fun <ReturnType> request(
         returnTypeData: TypeData,
         statement: suspend () -> HttpStatement
     ): ReturnType? {
@@ -45,7 +45,7 @@ internal class KtorfitConverter(private val ktorfit: Ktorfit) : Client {
      * This will handle all requests for functions with suspend modifier
      * Used by generated Code
      */
-    override suspend fun <ReturnType> suspendRequest(
+    public suspend fun <ReturnType> suspendRequest(
         typeData: TypeData,
         statement: suspend () -> HttpStatement
     ): ReturnType? {
@@ -75,7 +75,11 @@ internal class KtorfitConverter(private val ktorfit: Ktorfit) : Client {
         }
     }
 
-    override fun <T : Any> convertParameterType(
+    /**
+     * Convert [data] of type [parameterType] to [requestType]
+     * @return converted [data]
+     */
+    public fun <T : Any> convertParameterType(
         data: Any,
         parameterType: KClass<*>,
         requestType: KClass<T>

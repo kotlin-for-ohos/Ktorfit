@@ -100,7 +100,7 @@ fun ClassData.getImplClassFileSource(resolver: Resolver): String {
         .addSuperinterface(ktorfitServiceClassName)
         .addKtorfitSuperInterface(classData.superClasses)
         .addFunctions(classData.functions.map { it.toFunSpec(resolver) })
-        .addProperties(properties+ listOf(ktorfitProperty,clientProperty))
+        .addProperties(properties+ listOf(ktorfitProperty))
         .build()
 
     return FileSpec.builder(classData.packageName, implClassName)

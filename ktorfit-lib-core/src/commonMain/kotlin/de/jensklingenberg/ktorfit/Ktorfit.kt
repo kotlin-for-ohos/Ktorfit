@@ -81,7 +81,6 @@ public class Ktorfit private constructor(
         if (ktorfitService is DefaultKtorfitService) {
             throw IllegalArgumentException(ENABLE_GRADLE_PLUGIN)
         }
-        ktorfitService.setClient(KtorfitConverter(this))
         ktorfitService.setKtor(this)
         return ktorfitService as T
     }

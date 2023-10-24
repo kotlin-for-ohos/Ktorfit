@@ -8,21 +8,10 @@ import de.jensklingenberg.ktorfit.Ktorfit
  */
 public interface KtorfitService {
     public var ktorfit: Ktorfit
-    public var ktorfitClient: Client
-
-
-    /**
-     * Used to set the [ktorfitClient] at runtime
-     */
-    public fun setClient(ktorfitClient: Client) {
-        this.ktorfitClient = ktorfitClient
-    }
 
     public fun setKtor(ktorfitClient: Ktorfit) {
         this.ktorfit = ktorfitClient
     }
-
-
 }
 
 /**
@@ -30,8 +19,6 @@ public interface KtorfitService {
  * When this class is used at runtime, it means that the compiler plugin
  * did not replace the default parameter with the right class
  */
-@OptIn(InternalKtorfitApi::class)
 internal class DefaultKtorfitService : KtorfitService {
-    override lateinit var ktorfitClient: Client
     override lateinit var ktorfit: Ktorfit
 }

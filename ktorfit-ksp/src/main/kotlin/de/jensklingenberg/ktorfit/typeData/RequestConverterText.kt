@@ -16,7 +16,7 @@ fun FunSpec.Builder.addRequestConverterText(parameterDataList: List<ParameterDat
                     "val %L: %T = %L.convertParameterType(%L,%L::class,%T::class)",
                     parameter.name,
                     requestTypeClassName,
-                    ktorfitClientClass.objectName,
+                    "KtorfitConverter(ktorfit)",
                     parameter.name,
                     parameter.name,
                     requestTypeClassName

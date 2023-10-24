@@ -2,7 +2,6 @@ package de.jensklingenberg.ktorfit.converter
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.TestEngine
-import de.jensklingenberg.ktorfit.internal.Client
 import de.jensklingenberg.ktorfit.internal.KtorfitConverter
 import io.ktor.client.request.*
 
@@ -22,7 +21,7 @@ class RequestParameterConverterTest {
         val ktorfit =
             Ktorfit.Builder().httpClient(engine).baseUrl("http://www.test.de/").requestConverter(TestStringToIntRequestConverter()).build()
 
-        val converted = (KtorfitConverter(ktorfit) as Client).convertParameterType("4", String::class, Int::class)
+        val converted = (KtorfitConverter(ktorfit) ).convertParameterType("4", String::class, Int::class)
         assertEquals(4, converted)
 
     }

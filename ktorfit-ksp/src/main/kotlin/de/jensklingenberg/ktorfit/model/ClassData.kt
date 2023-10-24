@@ -74,13 +74,21 @@ fun ClassData.getImplClassFileSource(resolver: Resolver): String {
 
     val clientProperty = PropertySpec
         .builder(
-            clientClass.objectName,
-            TypeVariableName(clientClass.name),
-            listOf(KModifier.OVERRIDE, KModifier.LATEINIT)
+            name = clientClass.objectName,
+            type = TypeVariableName(clientClass.name),
+            modifiers = listOf(KModifier.OVERRIDE, KModifier.LATEINIT)
         )
         .mutable(true)
         .build()
 
+    val ktorfitProperty = PropertySpec
+        .builder(
+            name = ktorfitClass.objectName,
+            type = TypeVariableName(ktorfitClass.name),
+            modifiers = listOf(KModifier.OVERRIDE, KModifier.LATEINIT)
+        )
+        .mutable(true)
+        .build()
 
     val implClassSpec = TypeSpec.classBuilder(implClassName)
         .addAnnotation(
@@ -92,10 +100,7 @@ fun ClassData.getImplClassFileSource(resolver: Resolver): String {
         .addSuperinterface(ktorfitServiceClassName)
         .addKtorfitSuperInterface(classData.superClasses)
         .addFunctions(classData.functions.map { it.toFunSpec(resolver) })
-        .addProperty(
-            clientProperty
-        )
-        .addProperties(properties)
+        .addProperties(properties+ listOf(ktorfitProperty,clientProperty))
         .build()
 
     return FileSpec.builder(classData.packageName, implClassName)
@@ -137,6 +142,7 @@ fun KSClassDeclaration.toClassData(logger: KSPLogger): ClassData {
         add("io.ktor.http.*")
         add(ktorfitClass.packageName + "." + ktorfitClass.name)
         add("de.jensklingenberg.ktorfit.internal.*")
+        add("de.jensklingenberg.ktorfit.Ktorfit")
     }
 
     val packageName = ksClassDeclaration.packageName.asString()

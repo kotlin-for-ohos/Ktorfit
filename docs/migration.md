@@ -1,6 +1,12 @@
 # Migration
 Here is how to migrate from deprecated code:
 
+## From x to 2.0
+You used FlowConverterFactory, add de.jensklingenberg.ktorfit:ktorfit-converters-flow:
+You used CallConverterFactory, add de.jensklingenberg.ktorfit:ktorfit-converters-call:
+You used de.jensklingenberg.ktorfit.Response, add de.jensklingenberg.ktorfit:ktorfit-converters-response:
+
+
 ## From 1.7.0 to 1.8.1
 
 ### SuspendResponseConverter

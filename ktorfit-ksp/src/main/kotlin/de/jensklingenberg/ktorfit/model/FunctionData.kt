@@ -53,9 +53,11 @@ data class FunctionData(
                 getTypeDataArgumentText(
                     this,
                 )
+            ).addStatement(
+                "val client = suspend { ktorfit.httpClient.prepareRequest(_ext) }"
             )
             .addStatement(
-                "return %L.%L<${returnTypeName}, ${innerReturnType}>(${typeDataClass.objectName},${extDataClass.objectName})$nullableText",
+                "return %L.%L(${typeDataClass.objectName},client)$nullableText",
                 ktorfitClientClass.objectName,
                 if (this.isSuspend) {
                     "suspendRequest"

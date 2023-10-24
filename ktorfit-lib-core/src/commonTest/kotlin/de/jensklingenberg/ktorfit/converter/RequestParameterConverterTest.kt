@@ -2,7 +2,6 @@ package de.jensklingenberg.ktorfit.converter
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.TestEngine
-import de.jensklingenberg.ktorfit.TestStringToIntRequestConverter
 import de.jensklingenberg.ktorfit.internal.Client
 import de.jensklingenberg.ktorfit.internal.KtorfitClient
 import io.ktor.client.request.*
